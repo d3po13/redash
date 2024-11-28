@@ -57,14 +57,15 @@ VisualizationEmbedHeader.propTypes = {
 VisualizationEmbedHeader.defaultProps = { queryDescription: "" };
 
 function VisualizationEmbedFooter({
-  query,
-  queryResults,
-  updatedAt,
-  refreshStartedAt,
-  queryUrl,
-  hideTimestamp,
-  apiKey,
-}) {
+                                    query,
+                                    queryResults,
+                                    updatedAt,
+                                    refreshStartedAt,
+                                    queryUrl,
+                                    hideDownload,
+                                    hideTimestamp,
+                                    apiKey,
+                                  }) {
   const downloadMenu = (
     <Menu>
       <Menu.Item>
@@ -75,7 +76,7 @@ function VisualizationEmbedFooter({
           apiKey={apiKey}
           disabled={!queryResults || !queryResults.getData || !queryResults.getData()}
           embed>
-          <FileOutlinedIcon /> Download as CSV File
+          <FileOutlinedIcon /> Скачать в формате CSV
         </QueryResultsLink>
       </Menu.Item>
       <Menu.Item>
@@ -86,7 +87,7 @@ function VisualizationEmbedFooter({
           apiKey={apiKey}
           disabled={!queryResults || !queryResults.getData || !queryResults.getData()}
           embed>
-          <FileOutlinedIcon /> Download as TSV File
+          <FileOutlinedIcon /> Скачать в формате TSV
         </QueryResultsLink>
       </Menu.Item>
       <Menu.Item>
@@ -97,7 +98,7 @@ function VisualizationEmbedFooter({
           apiKey={apiKey}
           disabled={!queryResults || !queryResults.getData || !queryResults.getData()}
           embed>
-          <FileExcelOutlinedIcon /> Download as Excel File
+          <FileExcelOutlinedIcon /> Скачать в формате Excel
         </QueryResultsLink>
       </Menu.Item>
     </Menu>
@@ -116,24 +117,24 @@ function VisualizationEmbedFooter({
           </span>
         </span>
       )}
-      {queryUrl && (
-        <span className="hidden-print">
+      <span className="hidden-print">
+        {queryUrl && (
           <Tooltip title="Open in Redash">
             <Link.Button className="icon-button" href={queryUrl} target="_blank">
               <i className="fa fa-external-link" aria-hidden="true" />
               <span className="sr-only">Open in Redash</span>
             </Link.Button>
           </Tooltip>
-          {!query.hasParameters() && (
-            <Dropdown overlay={downloadMenu} disabled={!queryResults} trigger={["click"]} placement="topLeft">
-              <Button loading={!queryResults && !!refreshStartedAt} className="m-l-5">
-                Download Dataset
-                <i className="fa fa-caret-up m-l-5" aria-hidden="true" />
-              </Button>
-            </Dropdown>
-          )}
-        </span>
-      )}
+        )}
+        {!hideDownload && (
+          <Dropdown overlay={downloadMenu} disabled={!queryResults} trigger={["click"]} placement="topLeft">
+            <Button loading={!queryResults && !!refreshStartedAt} className="m-l-5">
+              Скачать данные
+              <i className="fa fa-caret-up m-l-5" aria-hidden="true" />
+            </Button>
+          </Dropdown>
+        )}
+      </span>
     </div>
   );
 }
@@ -144,6 +145,7 @@ VisualizationEmbedFooter.propTypes = {
   updatedAt: PropTypes.string,
   refreshStartedAt: Moment,
   queryUrl: PropTypes.string,
+  hideDownload: PropTypes.bool,
   hideTimestamp: PropTypes.bool,
   apiKey: PropTypes.string,
 };
@@ -153,6 +155,7 @@ VisualizationEmbedFooter.defaultProps = {
   updatedAt: null,
   refreshStartedAt: null,
   queryUrl: null,
+  hideDownload: false,
   hideTimestamp: false,
   apiKey: null,
 };
@@ -185,7 +188,7 @@ function VisualizationEmbed({ queryId, visualizationId, apiKey, onError }) {
       setError(null);
       setRefreshStartedAt(moment());
       query
-        .getQueryResultPromise()
+        .getQueryResultPromise(0)
         .then(result => {
           setQueryResults(result);
         })
@@ -208,6 +211,7 @@ function VisualizationEmbed({ queryId, visualizationId, apiKey, onError }) {
   const hideHeader = has(location.search, "hide_header");
   const hideParametersUI = has(location.search, "hide_parameters");
   const hideQueryLink = has(location.search, "hide_link");
+  const hideDownloadLink = has(location.search, "hide_download_link");
   const hideTimestamp = has(location.search, "hide_timestamp");
 
   const showQueryDescription = has(location.search, "showDescription");
@@ -256,6 +260,7 @@ function VisualizationEmbed({ queryId, visualizationId, apiKey, onError }) {
         updatedAt={queryResults ? queryResults.getUpdatedAt() : undefined}
         refreshStartedAt={refreshStartedAt}
         queryUrl={!hideQueryLink ? query.getUrl() : null}
+        hideDownload={!!hideDownloadLink}
         hideTimestamp={hideTimestamp}
         apiKey={apiKey}
       />

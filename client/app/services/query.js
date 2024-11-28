@@ -176,8 +176,8 @@ export class Query {
     return url;
   }
 
-  getQueryResultPromise() {
-    return this.getQueryResult().toPromise();
+  getQueryResultPromise(maxAge) {
+    return this.getQueryResult(maxAge).toPromise();
   }
 
   getParameters() {

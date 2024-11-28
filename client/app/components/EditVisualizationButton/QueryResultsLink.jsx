@@ -15,6 +15,10 @@ export default function QueryResultsLink(props) {
     } else {
       href = `api/query_results/${resultId}.${fileType}`;
     }
+  } else if (queryResult.job && queryResult.job.query_result_id) {
+    const jobQueryResultId = queryResult.job.query_result_id;
+
+    href = `api/query_results/${jobQueryResultId}.${fileType}${props.embed ? `?api_key=${props.apiKey}` : ""}`;
   }
 
   return (
